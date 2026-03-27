@@ -90,6 +90,7 @@ EXPOSE 3000
 ENV PORT=3000
 
 ENV HOSTNAME="0.0.0.0"
-# Next.js standalone output in a monorepo creates server.js at apps/frontend/server.js
-# relative to the standalone root (which we copied to /app)
-CMD ["node", "apps/frontend/server.js"]
+# Next.js standalone output: when COPY --from=builder /app/apps/frontend/.next/standalone ./
+# is used, the standalone root is /app. The server.js is at the root of standalone output.
+# In a monorepo with transpilePackages, server.js lands at /app/server.js
+CMD ["node", "server.js"]
