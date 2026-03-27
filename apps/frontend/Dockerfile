@@ -93,4 +93,5 @@ ENV HOSTNAME="0.0.0.0"
 # Next.js standalone output: when COPY --from=builder /app/apps/frontend/.next/standalone ./
 # is used, the standalone root is /app. The server.js is at the root of standalone output.
 # In a monorepo with transpilePackages, server.js lands at /app/server.js
-CMD ["node", "server.js"]
+# Diagnostic: find and run server.js wherever it is in the standalone output
+CMD ["sh", "-c", "echo '=== Listing /app ===' && ls -la /app/ && echo '=== Finding server.js ===' && find /app -name 'server.js' -maxdepth 5 2>/dev/null && echo '=== Running server ===' && node $(find /app -name 'server.js' -maxdepth 5 | head -1)"]
