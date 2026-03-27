@@ -59,17 +59,15 @@ ENV NEXT_PUBLIC_VERCEL_ENV=production
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 
-RUN groupadd --system --gid 1001 nodejs
-RUN useradd --system --uid 1001 --gid nodejs nextjs
-
+# Use the built-in 'node' user from node:22-slim (uid 1000)
 # Copy built frontend assets from the workspace path.
 # Next.js standalone output includes everything needed to run the server.
 # The standalone directory structure mirrors the workspace, so we copy it as-is.
-COPY --from=builder --chown=nextjs:nodejs /app/apps/frontend/.next/standalone ./
-COPY --from=builder --chown=nextjs:nodejs /app/apps/frontend/.next/static ./apps/frontend/.next/static
-COPY --from=builder --chown=nextjs:nodejs /app/apps/frontend/public ./apps/frontend/public
+COPY --from=builder --chown=node:node /app/apps/frontend/.next/standalone ./
+COPY --from=builder --chown=node:node /app/apps/frontend/.next/static ./apps/frontend/.next/static
+COPY --from=builder --chown=node:node /app/apps/frontend/public ./apps/frontend/public
 
-USER nextjs
+USER node
 
 EXPOSE 3000
 
