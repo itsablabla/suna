@@ -29,8 +29,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     librsvg2-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# Install only the frontend workspace project (and its deps) using pnpm.
-RUN corepack enable pnpm && pnpm install --filter ./apps/frontend ${PNPM_LOCKFILE_MODE}
+# Install ALL workspace deps so shared package devDeps (@types/react etc.) are available
+# during TypeScript compilation. The filter-only approach skips devDeps of peer packages.
+RUN corepack enable pnpm && pnpm install ${PNPM_LOCKFILE_MODE}
 
 
 # ---- Builder Stage ----
