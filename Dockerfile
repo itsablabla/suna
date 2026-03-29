@@ -1,3 +1,4 @@
+# Cache bust: 2026-03-29 - rebuild with correct NEXT_PUBLIC_BACKEND_URL=https://suna-backend-production-dc72.up.railway.app/api
 FROM node:20-slim
 
 WORKDIR /app
