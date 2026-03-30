@@ -192,6 +192,45 @@ export async function GET(request: NextRequest) {
     }
   }
   
-  // No code or token - redirect to auth page
-  return NextResponse.redirect(`${baseUrl}/auth`)
+  // No code or token - may be implicit flow with #access_token in hash
+  // Server cannot read URL fragments (browser-only), so serve a client-side page
+  // that detects the hash token and calls setSession()
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || ''
+  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
+  const html = `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Signing in...</title>
+  <style>body{display:flex;align-items:center;justify-content:center;height:100vh;margin:0;font-family:sans-serif;background:#0a0a0a;color:#fff;}</style>
+</head>
+<body>
+  <p>Signing you in...</p>
+  <script type="module">
+    import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+    const hash = window.location.hash
+    if (hash && hash.includes('access_token=')) {
+      const params = new URLSearchParams(hash.substring(1))
+      const accessToken = params.get('access_token')
+      const refreshToken = params.get('refresh_token')
+      if (accessToken && refreshToken) {
+        const supabase = createClient('${supabaseUrl}', '${supabaseAnonKey}')
+        const { error } = await supabase.auth.setSession({ access_token: accessToken, refresh_token: refreshToken })
+        if (error) {
+          window.location.href = '/auth?error=' + encodeURIComponent(error.message)
+        } else {
+          window.location.href = '${next}'
+        }
+      } else {
+        window.location.href = '/auth'
+      }
+    } else {
+      window.location.href = '/auth'
+    }
+  </script>
+</body>
+</html>`
+  return new Response(html, {
+    headers: { 'Content-Type': 'text/html; charset=utf-8' },
+  })
 }
