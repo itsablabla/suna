@@ -14,6 +14,7 @@ import { Mail, MailCheck, Clock, ExternalLink } from 'lucide-react';
 import { KortixLoader } from '@/components/ui/kortix-loader';
 import { useAuth } from '@/components/AuthProvider';
 import { useAuthMethodTracking } from '@/stores/auth-tracking';
+import { createClient } from '@/lib/supabase/client';
 import { toast } from '@/lib/toast';
 import { useTranslations } from 'next-intl';
 import { KortixLogo } from '@/components/sidebar/kortix-logo';
@@ -80,6 +81,31 @@ function LoginContent() {
 
   useEffect(() => {
     setMounted(true);
+  }, []);
+
+  // Handle implicit flow: detect #access_token in URL hash and exchange for session
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const hash = window.location.hash;
+    if (!hash || !hash.includes('access_token=')) return;
+
+    const params = new URLSearchParams(hash.substring(1));
+    const accessToken = params.get('access_token');
+    const refreshToken = params.get('refresh_token');
+    if (!accessToken || !refreshToken) return;
+
+    const supabase = createClient();
+    supabase.auth.setSession({ access_token: accessToken, refresh_token: refreshToken })
+      .then(({ error }) => {
+        if (error) {
+          console.error('Failed to set session from hash token:', error);
+        } else {
+          // Session set - the AuthProvider onAuthStateChange will fire SIGNED_IN
+          // which will trigger the redirect to dashboard via the user effect above
+          // Clear the hash from the URL
+          window.history.replaceState(null, '', window.location.pathname + window.location.search);
+        }
+      });
   }, []);
 
   useEffect(() => {
