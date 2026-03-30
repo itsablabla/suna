@@ -154,9 +154,14 @@ export default function DashboardLayoutContent({
   const isApiHealthy = healthData?.status === 'ok' && !healthError;
 
   // Check authentication status
+  // Add a delay to allow AutoLogin component to sign in before redirecting
   useEffect(() => {
     if (!isLoading && !user) {
-      router.push('/auth');
+      const timer = setTimeout(() => {
+        // Re-check: only redirect if still no user after AutoLogin had time to run
+        router.push('/auth');
+      }, 3000);
+      return () => clearTimeout(timer);
     }
   }, [user, isLoading, router]);
 
