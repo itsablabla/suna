@@ -3,6 +3,7 @@ import { siteMetadata } from '@/lib/site-metadata';
 import type { Metadata, Viewport } from 'next';
 import './globals.css';
 import { AuthProvider } from '@/components/AuthProvider';
+import { AutoLogin } from '@/components/AutoLogin';
 import { PresenceProvider } from '@/components/presence-provider';
 import { ReactQueryProvider } from './react-query-provider';
 import { Toaster } from '@/components/ui/sonner';
@@ -248,6 +249,7 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
+          <AutoLogin />
           <AuthProvider>
             <I18nProvider>
               <PresenceProvider>
