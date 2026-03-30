@@ -21,10 +21,9 @@ export async function GET(request: NextRequest) {
   const termsAccepted = searchParams.get('terms_accepted') === 'true'
   const email = searchParams.get('email') || '' // Email passed from magic link redirect URL
 
-  // Use request origin for redirects (most reliable for local dev)
-  // This ensures localhost:3000 redirects stay on localhost, not staging
-  const requestOrigin = request.nextUrl.origin
-  const baseUrl = process.env.NEXT_PUBLIC_URL || requestOrigin || 'http://localhost:3000'
+  // CRITICAL: request.nextUrl.origin resolves to the internal container URL (e.g. http://localhost:8080)
+  // inside Railway/Docker. Always use NEXT_PUBLIC_URL which is set to the public domain.
+  const baseUrl = process.env.NEXT_PUBLIC_URL || 'https://suna.garza-os.com'
   const error = searchParams.get('error')
   const errorCode = searchParams.get('error_code')
   const errorDescription = searchParams.get('error_description')
